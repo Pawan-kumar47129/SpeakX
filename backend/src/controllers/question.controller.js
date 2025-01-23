@@ -59,7 +59,7 @@ export const searchBaseOnTitle = async (req, res) => {
     page = parseInt(page);
     limit = parseInt(limit);
     const response = await Question.aggregate([
-      { $match: { $text: { $search: query } } },
+      { $match: { $text: { $search: query} } },
       {
         $addFields: {
           score: { $meta: "textScore" },
