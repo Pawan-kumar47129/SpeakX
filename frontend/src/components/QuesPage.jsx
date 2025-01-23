@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useParams, useNavigate} from "react-router";
-import { setCurrentPage, setQuestions } from "../store/searchSlice";
+import { useParams, useNavigate, useSearchParams} from "react-router";
+import { setCurrentPage, setQuery, setQuestions } from "../store/searchSlice";
 import { axiosInstance } from "../utils/axios";
+import MCQ from "./MCQ";
+import Anagram from "./Anagram";
+import ReadOnly from "./ReadOnly";
 
 const QuesPage = () => {
   const dispatch = useDispatch();
@@ -11,42 +14,53 @@ const QuesPage = () => {
     (state) => state.search
   );
   const [error,setError]=useState("");
-  const { pageId } = useParams();
+  const {pageId} = useParams();
+ 
+  const [searchParams,setSearchParams]=useSearchParams();
+  const queryUrl=searchParams.get('query');
+
+  console.log(queryUrl);
 
   useEffect(() => {
+    console.log("hqqq")
     const urlPage = parseInt(pageId, 10) || 1;
     if (urlPage !== currentPage) {
       dispatch(setCurrentPage(urlPage));
     }
-  }, [pageId, dispatch, currentPage]);
+    if(queryUrl && queryUrl!==query){
+      dispatch(setQuery(queryUrl));
+    }
+  }, []);
 
   useEffect(() => {
+    const controller=new AbortController();
     const fetchQuestions = async () => {
       try {
         if(query.length==0) return;
         const response = await axiosInstance.get(
           `/questions/get-question-on-title?page=${currentPage}&limit=${itemsPerPage}&query=${query}`
-        );
+        ,{signal:controller.signal});
         console.log(response);
-        dispatch(setQuestions({ questions: response.data.data.document, total: response.data.data.totalQues }));
+        dispatch(setQuestions({ questions: response.data?.data.document, total: response.data?.data.totalQues }));
       } catch (error) {
-        setError(error.response.data.message);
-        console.error("Failed to fetch questions:", error);
+        setError(error.response?.data?.message);
       }
     };
-
     fetchQuestions();
+
+    return ()=>controller.abort()
+
   }, [currentPage, dispatch, itemsPerPage,query]);
 
   const handleNext = () => {
-    const nextPage = currentPage + 1;
+    const nextPage = parseInt(currentPage) + 1;
     dispatch(setCurrentPage(nextPage));
     navigate(`/questions/page/${nextPage}?query=${query}`);
   };
 
   const handlePrevious = () => {
     if (currentPage > 1) {
-      const prevPage = currentPage - 1;
+      const prevPage = parseInt(currentPage) - 1;
       dispatch(setCurrentPage(prevPage));
       navigate(`/questions/page/${prevPage}?query=${query}`);
     }
@@ -55,26 +69,28 @@ const QuesPage = () => {
   const totalPages = Math.ceil(totalQuestions / itemsPerPage);
 
   return (
-    <div>
-      {questions.length>0 && <ul>
-        {questions.map((question) => (
-          <li key={question._id}>
-            <h3>{question.title}</h3>
-            <p>Type: {question.type}</p>
-          </li>
-        ))}
-      </ul>}
-
-      {/* Pagination Controls */}
+    <div className="flex flex-col justify-center sm:mx-4 md:mx-8 lg:mx-10 p-4 mt-8 items-center">
+      {error && <p>{error}</p>}
       
-      {totalQuestions>itemsPerPage && <div className="pagination-buttons">
-        <button onClick={handlePrevious} disabled={currentPage <= 1}>
+      {questions.length>1 && <div className="flex flex-col gap-4 ">
+        {questions.map((question,idx)=>{
+          if(question.type=="MCQ") return <MCQ key={idx}ques={question} idx={idx}/>
+          else if(question.type=="ANAGRAM") return <Anagram key={idx} ques={question} idx={idx}/>
+          else{
+            return <ReadOnly key={idx}ques={question} idx={idx} />
+          }
+        })}
+      </div>}
+      
+      
+      {totalQuestions>itemsPerPage && <div className="flex space-x-2  justify-center my-4">
+        <button onClick={handlePrevious} disabled={currentPage <= 1} className={ `cursor-pointer underline text-blue-400 hover:text-orange-600 ${currentPage==1?"hidden":"inline-block"}`}>
           Previous
         </button>
-        <span>
+        <span className="text-pretty">
           Page {currentPage} of {totalPages}
         </span>
-        <button onClick={handleNext} disabled={currentPage >= totalPages}>
+        <button onClick={handleNext} disabled={currentPage >= totalPages} className=" cursor-pointer underline text-blue-400 hover:text-orange-600">
           Next
         </button>
       </div>}

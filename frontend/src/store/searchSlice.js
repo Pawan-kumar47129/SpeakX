@@ -18,7 +18,6 @@ const initialState = {
         state.currentPage = action.payload;
       },
       setQuestions(state, action) {
-        console.log(action);
         state.questions = action.payload.questions;
         state.totalQuestions = action.payload.total;
       },
