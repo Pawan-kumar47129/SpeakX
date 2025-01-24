@@ -55,17 +55,19 @@ export const filterBaseOnType = async (req, res) => {
 
 export const searchBaseOnTitle = async (req, res) => {
   try {
-    let { query, page = "1", limit = "10" } = req.query;
+    let { query, page = "1", limit = "10",filter } = req.query;
+    filter=filter?.split(',')||[];
     page = parseInt(page);
     limit = parseInt(limit);
     const response = await Question.aggregate([
-      { $match: { $text: { $search: query} } },
       {
-        $addFields: {
-          score: { $meta: "textScore" },
+        $match: {
+          $and: [
+            ...(query ? [{ title: { $regex:query,$options:'i' } }] : []),
+            ...(filter.length ? [{ type: { $in: filter } }] : []),
+          ],
         },
       },
-      { $sort: { score: { $meta: "textScore" } } },
       {
         $facet: {
           totalQues: [{ $count: "count" }],
@@ -102,7 +104,7 @@ export const searchBaseOnTitle = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log("some error occure while fetching data", error.message);
+    console.log("some error occure while fetching data", error);
     res.status(500).json({
       success: false,
       message: "Server side error occure while fetching data",

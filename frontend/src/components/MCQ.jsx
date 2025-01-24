@@ -5,8 +5,8 @@ function MCQ({ ques, idx }) {
   const { currentPage } = useSelector((state) => state.search);
   let quesNo = idx + 1 + (currentPage - 1) * 10;
   return (
-    <div className="flex flex-col gap-y-2">
-      <h3 className="font-medium">
+    <div className="flex flex-col gap-y-2 shadow-orange-500">
+      <h3 className="font-bold">
         Ques{quesNo}
         {": " + ques.title}
       </h3>

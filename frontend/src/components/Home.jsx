@@ -6,7 +6,7 @@ function Home() {
   return (
     <div>
       <Header/>
-      <div className='mt-12'>
+      <div className='mt-[80px]'>
       <Outlet/>
       </div>
     </div>

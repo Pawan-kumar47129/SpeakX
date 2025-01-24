@@ -1,11 +1,11 @@
 import { createSlice } from "@reduxjs/toolkit";
-
 const initialState = {
     query: "",
     currentPage: 1,
     questions: [],
     totalQuestions: 0,
     itemsPerPage: 10,
+    filters:[],
   };
   const searchSlice = createSlice({
     name: "search",
@@ -21,8 +21,14 @@ const initialState = {
         state.questions = action.payload.questions;
         state.totalQuestions = action.payload.total;
       },
+      setFilter:(state,action)=>{
+        state.filters=action.payload;
+      },
+      removeFilter:(state,action)=>{
+        state.filters=(state.filters).filter((option)=>option!==action.payload);
+      }
     },
   });
   
-  export const { setQuery, setCurrentPage, setQuestions } = searchSlice.actions;
+  export const { setQuery, setCurrentPage, setQuestions,setFilter } = searchSlice.actions;
   export default searchSlice.reducer;
