@@ -59,6 +59,7 @@ export const searchBaseOnTitle = async (req, res) => {
     filter=filter?.split(',')||[];
     page = parseInt(page);
     limit = parseInt(limit);
+    console.log(req.query);
     const response = await Question.aggregate([
       {
         $match: {

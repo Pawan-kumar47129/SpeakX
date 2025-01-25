@@ -9,13 +9,16 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.get("/",(req,res)=>{
+app.get("/",async(req,res)=>{
+    const data=await Question.find().limit(10);
     res.json({
-        message:"Good morning how are you"
+        message:"Good morning how are you",
+        data
     })
 })
 //Router
 import questionRouter from "./routes/question.routes.js"
+import { Question } from "./models/question.models.js";
 
 app.use("/api/v1/questions",questionRouter);
 
