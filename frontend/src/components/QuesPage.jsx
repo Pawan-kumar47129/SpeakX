@@ -23,7 +23,7 @@ const QuesPage = () => {
       try {
         if(query && filters.length==0)return;
         const response = await axiosInstance.get(
-          `api/v1/questions/get-question-on-title?page=${currentPage}&limit=${itemsPerPage}&query=${query}&filter=${filters.join(',')}`
+          `/api/v1/questions/get-question-on-title?page=${currentPage}&limit=${itemsPerPage}&query=${query}&filter=${filters.join(',')}`
         ,{signal:controller.signal});
         dispatch(setQuestions({ questions: response.data?.data.document, total: response.data?.data.totalQues }));
       } catch (error) {
