@@ -6,6 +6,7 @@ import { axiosInstance } from "../utils/axios";
 import MCQ from "./MCQ";
 import Anagram from "./Anagram";
 import ReadOnly from "./ReadOnly";
+import Loading from "./Loading";
 
 const QuesPage = () => {
   const dispatch = useDispatch();
@@ -14,19 +15,21 @@ const QuesPage = () => {
     (state) => state.search
   );
   const [error,setError]=useState("");
-  const {pageId} = useParams();
- 
+  const [loading,setLoading]=useState(false);
   useEffect(() => {
     const controller=new AbortController();
     const fetchQuestions = async () => {
+      setLoading(true);
       try {
         if(query && filters.length==0)return;
         const response = await axiosInstance.get(
-          `/questions/get-question-on-title?page=${currentPage}&limit=${itemsPerPage}&query=${query}&filter=${filters.join(',')}`
+          `api/v1/questions/get-question-on-title?page=${currentPage}&limit=${itemsPerPage}&query=${query}&filter=${filters.join(',')}`
         ,{signal:controller.signal});
         dispatch(setQuestions({ questions: response.data?.data.document, total: response.data?.data.totalQues }));
       } catch (error) {
         setError(error.response?.data?.message);
+      }finally{
+        setLoading(false);
       }
     };
     fetchQuestions();
@@ -50,7 +53,7 @@ const QuesPage = () => {
   };
 
   const totalPages = Math.ceil(totalQuestions / itemsPerPage);
-
+  if(loading) return <Loading/>
   return (
     <div className="flex flex-col justify-center sm:mx-4 md:mx-8 lg:mx-10 p-4 mt-8 items-center">
       {error && <p>{error}</p>}
