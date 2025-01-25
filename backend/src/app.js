@@ -9,7 +9,11 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+app.get("/",(req,res)=>{
+    res.json({
+        message:"Good morning how are you"
+    })
+})
 //Router
 import questionRouter from "./routes/question.routes.js"
 
